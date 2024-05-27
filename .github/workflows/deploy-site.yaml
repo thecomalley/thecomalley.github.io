@@ -1,6 +1,5 @@
 name: Deploy to Github Pages
 
-# run when a commit is pushed to "source" branch
 on:
   push:
     branches:
@@ -10,7 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    # checkout to the commit that has been pushed
     - uses: actions/checkout@v3
 
     - name: Setup Hugo
@@ -35,7 +33,6 @@ jobs:
     - name: Build
       run: hugo --minify
 
-    # push the generated content into the `gh-pages` branch.
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3.9.0
       with:
