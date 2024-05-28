@@ -1,0 +1,37 @@
+# section information
+section:
+  name: Projects
+  id: projects
+  enable: true
+  weight: 5
+  showOnNavbar: true
+
+buttons:
+- name: All
+  filter: "all"
+- name: Professional
+  filter: "professional"
+- name: Hobby
+  filter: "hobby"
+
+projects:
+- name: CRIB
+  role: DevOps Engineer
+  summary: "A machine learning platform, based on Microsoft Azure, processes individual images to generate row counts and a total box count for each container."
+  timeline: "2021"
+  url: "https://concepts.co.nz/case-studies/anzco-foods"
+  tags: ["professional", "AI", "cloud", "machine-learning"]
+
+- name: Application Rehosting
+  role: DevOps Engineer
+  timeline: "2021"
+  url: "https://concepts.co.nz/case-studies/medi-map-growth-microsoft-azure"
+  summary: Rehosting of a legacy application to Microsoft Azure improving security, scalability, and performance.
+  tags: ["professional", "machine-learning"]
+
+- name: Azure Landing Zone
+  role: DevOps Engineer
+  timeline: "2021"
+  url: "https://concepts.co.nz/case-studies/resene"
+  summary: "Design and implementation of an Azure Landing Zone with Infrastructure as Code (IaC) and CI/CD pipelines for Resene Paints."
+  tags: ["professional", "Azure", "cloud", "Landing Zone"]
