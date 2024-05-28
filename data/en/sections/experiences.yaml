@@ -14,13 +14,12 @@ experiences:
     logo: /images/sections/experiences/ccl.png
     overview: Bringing the best of global cloud innovation to Aotearoa, we help you transform your business and navigate the new.
   positions:
-  - designation: Senior Software Engineer
-    start: Nov 2019
+  - designation: Senior Azure Cloud DevOps Engineer
+    start: Oct 2023
     responsibilities:
-    - Design and develop XYZ tool for ABC task
-    - Design, develop and manage disaster recovery tool [Xtool](https://www.example.com) that backup Kubernetes volumes, databases, and cluster's resource definition.
-    - Lead backend team.
-
+    - lead internal development within Azure chapter
+    - Build and deploy Azure based solutions for customers
+    - Find and solve problems in the cloud and
 
 - company:
     name: Leaven.
