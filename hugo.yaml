@@ -12,3 +12,35 @@ module:
     target: static/files
   - source: ./node_modules/katex/dist/fonts
     target: static/fonts
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  tableOfContents:
+    startLevel: 2
+    endLevel: 6
+    ordered: false
+
+# At least HTML and JSON are required for the main HTML content and
+# client-side JavaScript search
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+enableEmoji: true
+
+params:
+  gitRepo: https://thecomalley.github.io/#home
+
+  features:
+    portfolio:
+      enable: true
+
+    blog:
+      enable: true
+
+    toc:
+      enable: true
