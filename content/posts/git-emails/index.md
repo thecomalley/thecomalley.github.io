@@ -1,6 +1,6 @@
 ---
 title: "Configuring Git to Use Different Author Email Addresses Based on Repository Location"
-date: 2024-06-28
+date: 2024-05-27
 description: A guide on how to configure Git to use different author email addresses depending on where you clone the repository in your local directory.
 menu:
   sidebar:
