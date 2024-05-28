@@ -1,0 +1,76 @@
+# section information
+section:
+  name: Experiences
+  id: experiences
+  enable: true
+  weight: 3
+  showOnNavbar: true
+
+experiences:
+- company:
+    name: CCL
+    url: "https://concepts.co.nz/"
+    location: Christchurch
+    logo: /images/sections/experiences/ccl.png
+    overview: Bringing the best of global cloud innovation to Aotearoa, we help you transform your business and navigate the new.
+  positions:
+  - designation: Senior Software Engineer
+    start: Nov 2019
+    responsibilities:
+    - Design and develop XYZ tool for ABC task
+    - Design, develop and manage disaster recovery tool [Xtool](https://www.example.com) that backup Kubernetes volumes, databases, and cluster's resource definition.
+    - Lead backend team.
+
+
+- company:
+    name: Leaven.
+    url: "https://www.leaven.co.nz"
+    location: Christchurch
+    logo: /images/sections/experiences/leaven.png
+    overview: Example Co. is a widely recognized company for cloud-native development. It builds tools for Kubernetes.
+  positions:
+  - designation: Senior Azure Cloud DevOps Engineer
+    start: Oct 2022
+    end: Oct 2023
+    responsibilities:
+    - Build and deploy cloud based solutions for customers
+    - Development of internal IP for team usage
+
+  - designation: Azure Cloud DevOps Engineer
+    start: Aug 2021
+    end: Oct 2022
+    responsibilities:
+    - Build and deploy cloud based solutions for customers
+    - Development of internal IP for team usage
+
+- company:
+    name: Computer Concepts Limited
+    url: "https://web.archive.org/web/20210302170359/https://concepts.co.nz/"
+    logo: /images/sections/experiences/ccl-old.png
+    location: Christchurch
+    overview: New Zealand based IT Managed Services Provider, CCL enables New Zealand organisations to achieve business outcomes through the successful delivery of technology and transformation services.
+  positions:
+
+  - designation: Cloud Service Design and Transition Lead
+    start: Sep 2020 
+    end: Aug 2021
+    responsibilities:
+    - Modern Service Management approaches
+    - Configuration of Cloud Native management tooling.
+    - Everything as Code.
+
+  - designation: Transitions Specialist
+    start: Jan 2018
+    end: Sep 2020
+    responsibilities:
+    - Assisted Customers and internal teams during transitions to outsourced support models.
+    - Documentation generation and process mapping
+    - Lots of ITIL.
+
+  - designation: Service Desk Engineer
+    start: Aug 2016
+    end: Jan 2018
+    responsibilities:
+    - Provided End user & Server Support.
+    - Managed incidents, changes service requests etc
+    - Consumption of excessive amounts of caffeine during night shifts.

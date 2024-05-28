@@ -1,6 +1,6 @@
-baseURL: https://example.org/
+baseURL: https://thecomalley.github.io
 languageCode: en-us
-title: My New Hugo Site
+title: Chris O'Malley
 
 module:
   imports:
@@ -12,6 +12,11 @@ module:
     target: static/files
   - source: ./node_modules/katex/dist/fonts
     target: static/fonts
+
+languages:
+  en:
+    languageName: English
+    weight: 1
 
 markup:
   goldmark:
@@ -34,13 +39,27 @@ enableEmoji: true
 
 params:
   gitRepo: https://thecomalley.github.io/#home
+  background: "images/nasa-Q1p7bh3SHj8-unsplash.jpg"
+
+  logo:
+    main: images/main-logo.png
+    inverted: images/inverted-logo.png
+    favicon: images/favicon.png
 
   features:
+    analytics:
+      enabled: false
+    newsletter:
+      enable: false
     portfolio:
       enable: true
-
     blog:
       enable: true
+      showAuthor: true # shows the post author (defaults true)
 
     toc:
       enable: true
+
+  # Configure footer
+  footer:
+    enable: true

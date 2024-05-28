@@ -1,0 +1,14 @@
+# some information about you
+name: "Chris O'Malley"
+nickname: "Chris"
+greeting: "Hi, I am"
+image: "images/author/chris.jpg"
+contactInfo:
+  github: thecomalley
+  linkedin: thecomalley
+
+# some summary about what you do
+summary:
+  - I am a DevOps engineer
+  - I am a doer
+  - I love to work with fun projects

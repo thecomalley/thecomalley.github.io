@@ -1,0 +1,60 @@
+# section information
+section:
+  name: About
+  id: about
+  enable: true
+  weight: 1
+  showOnNavbar: true
+  template: sections/about.html
+
+designation: Senior Azure Cloud DevOps Engineer
+company:
+  name: CCL
+  url: "https://concepts.co.nz/"
+
+# a summary about you
+summary: 'I am a results-driven Senior Azure Cloud DevOps Engineer with over 7 years of experience in cloud infrastructure, automation, and continuous integration/continuous delivery (CI/CD) pipelines. My expertise lies in designing, implementing, and managing DevOps solutions on the Azure platform. Currently, I contribute to Leavens success by leading the implementation and optimization of Azure cloud solutions.'
+
+socialLinks:
+- name: Github
+  icon: "fab fa-github"
+  url: "https://www.github.com/thecomalley"
+
+- name: LinkedIn
+  icon: "fab fa-linkedin"
+  url: "https://www.linkedin.com/in/thecomalley/"
+
+resourceLinks:
+# - title: "My Resume"
+#   url: "files/resume.pdf"
+
+badges:
+- type: certification
+  name: Microsoft Certified DevOps Engineer Expert
+  url: "https://www.credly.com/badges/2fffcba5-7065-4819-8112-6e7d9f32da93/public_url"
+  badge: "https://images.credly.com/size/340x340/images/c3ab66f8-5d59-4afa-a6c2-0ba30a1989ca/CERT-Expert-DevOps-Engineer-600x600.png"
+
+- type: certification
+  name: HashiCorp Certified Terraform Associate
+  url: "https://www.credly.com/badges/ef761b5d-5cc4-41aa-a5a5-749eedb78c48/public_url"
+  badge: "https://images.credly.com/size/680x680/images/85b9cfc4-257a-4742-878c-4f7ab4a2631b/image.png"
+
+- type: certification
+  name: ICAgile Agile Coaching
+  url: "https://www.credly.com/badges/40a2833b-38e6-48de-930a-f01951637cb7/public_url"
+  badge: "https://images.credly.com/size/340x340/images/5c50a643-ef0f-4bea-9c90-6fe2e785a1c8/image.png"
+
+- type: soft-skill-indicator
+  name: Leadership
+  percentage: 85
+  color: blue
+
+- type: soft-skill-indicator
+  name: Team Work
+  percentage: 90
+  color: yellow
+
+- type: soft-skill-indicator
+  name: Hard Working
+  percentage: 85
+  color: orange
