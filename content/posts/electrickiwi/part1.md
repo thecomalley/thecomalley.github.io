@@ -85,5 +85,3 @@ sensor:
     round: 2
 ```
 
-### Home Assistant Energy Dashboard
-{{< img src="/posts/electrickiwi/dashboard.png" title="Home Assistant Energy Dashboard" >}}
