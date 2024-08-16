@@ -16,7 +16,8 @@ experiences:
     positions:
       - designation: Senior Azure Cloud DevOps Engineer
         start: Oct 2023
-        responsibilities: Led internal development efforts within the Azure chapter, acting as the Product Owner for several key Azure Chapter IPs. Successfully built and deployed Azure-based solutions for a variety of customers, ensuring scalability and reliability in the cloud.
+        responsibilities:
+          - Led internal development efforts within the Azure chapter, acting as the Product Owner for several key Azure Chapter IPs. Successfully built and deployed Azure-based solutions for a variety of customers, ensuring scalability and reliability in the cloud.
 
   - company:
       name: Leaven.
@@ -28,12 +29,14 @@ experiences:
       - designation: Senior Azure Cloud DevOps Engineer
         start: Oct 2022
         end: Oct 2023
-        responsibilities: Focused on building and deploying cloud-based solutions tailored to customer needs, while contributing to the development of internal IP that enhanced team efficiency and project success.
+        responsibilities:
+          - Focused on building and deploying cloud-based solutions tailored to customer needs, while contributing to the development of internal IP that enhanced team efficiency and project success.
 
       - designation: Azure Cloud DevOps Engineer
         start: Aug 2021
         end: Oct 2022
-        responsibilities: Collaborated with the newly formed Innovation practice to deploy custom AI solutions on Azure. Contributed to the creation and improvement of internal IP, optimizing practices for future deployments.
+        responsibilities:
+          - Collaborated with the newly formed Innovation practice to deploy custom AI solutions on Azure. Contributed to the creation and improvement of internal IP, optimizing practices for future deployments.
 
   - company:
       name: Computer Concepts Limited
@@ -45,14 +48,17 @@ experiences:
       - designation: Cloud Service Design and Transition Lead
         start: Sep 2020
         end: Aug 2021
-        responsibilities: Pioneered modern service management approaches and configured cloud-native management tools for enhanced automation. Led initiatives to implement Everything as Code, transforming service operations and cloud integration.
+        responsibilities:
+          - Pioneered modern service management approaches and configured cloud-native management tools for enhanced automation. Led initiatives to implement Everything as Code, transforming service operations and cloud integration.
 
       - designation: Transitions Specialist
         start: Jan 2018
         end: Sep 2020
-        responsibilities: Facilitated smooth transitions for customers and internal teams into outsourced support models. Responsible for generating detailed documentation, mapping processes, and integrating ITIL practices into service operations.
+        responsibilities:
+          - Facilitated smooth transitions for customers and internal teams into outsourced support models. Responsible for generating detailed documentation, mapping processes, and integrating ITIL practices into service operations.
 
       - designation: Service Desk Engineer
         start: Aug 2016
         end: Jan 2018
-        responsibilities: Provided comprehensive end-user and server support, ensuring prompt resolution of incidents, changes, and service requests. Consistently maintained high service levels while managing a wide range of technical issues across diverse environments.
+        responsibilities:
+          - Provided comprehensive end-user and server support, ensuring prompt resolution of incidents, changes, and service requests. Consistently maintained high service levels while managing a wide range of technical issues across diverse environments.
