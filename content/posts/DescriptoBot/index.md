@@ -1,7 +1,7 @@
 ---
-title: "Automating Pull Request Descriptions in Azure DevOps"
+title: "Automating Pull Request Descriptions in Azure DevOps using DescriptoBot"
 date: 2024-10-16
-description: "Automating Pull Request Descriptions in Azure DevOps"
+description: "Automating Pull Request Descriptions in Azure DevOps using DescriptoBot"
 menu:
   sidebar:
     name: DescriptoBot
@@ -10,31 +10,22 @@ menu:
 hero: descriptobot.jpg
 ---
 
-In this post, we’ll explore how to replicate [GitHub Copilot’s pull request (PR) description functionality](https://docs.github.com/en/enterprise-cloud@latest/copilot/using-github-copilot/creating-a-pull-request-summary-with-github-copilot) within Azure DevOps, using a custom solution I’ve called DescriptoBot. The goal is to automate the creation of PR descriptions by leveraging Azure OpenAI models, providing a streamlined, AI-driven method to summarize changes and improve efficiency across teams.
+GitHub Copilot has an impressive [feature](https://docs.github.com/en/enterprise-cloud@latest/copilot/using-github-copilot/creating-a-pull-request-summary-with-github-copilot) that automatically generates pull request descriptions based on the changes made in a branch. However i wanted to use this functionality in Azure DevOps, so using Azure OpenAI i threw together a quick bot that automates the process of generating PR descriptions in Azure DevOps using OpenAI's GPT-4o model.
 
-### The Problem: Manual PR Descriptions
+## The Problem: Manual PR Descriptions
 
-Writing clear and concise PR descriptions can be a time-consuming task. Developers often need to summarize changes made in a feature branch, highlight key modifications, and provide context, which can easily be overlooked in fast-paced environments. While GitHub Copilot provides a useful feature for generating PR descriptions automatically, Azure DevOps lacks this native functionality.
+Writing clear and concise PR descriptions can be a time-consuming task. Developers often need to summarize changes made in a feature branch, highlight key modifications, and provide context, which can easily be overlooked in fast-paced environments. While GitHub Copilot provides a useful feature for generating PR descriptions automatically.
 
-To solve this, I built DescriptoBot, a simple python script that can be manually triggered by a developer when creating a PR in Azure DevOps. The script works by...
+The bot works by:
 
 - Fetching the diff between the source and target branches.
-- Passing the diff summary and full diff to OpenAI to generate a meaningful PR description.
-- Suggesting a PR title based on the changes.
-- Calculating the cost of the OpenAI prompt and output tokens.
+- Passing the diff along with a system message to OpenAI.
+- Tracking the cost of the OpenAI model usage, for proof of value.
 - Automatically updating the PR description in Azure DevOps.
 
-## Example Output
+### Fetching the diff between the source and target branches
+Here we define a function to get the diff between the source and target branches using the `git diff` command. This forms the bulk of the input we provide to the OpenAI model.
 
-![DescriptoBot Example](/descriptobot-example.png)
-
-## Core Python Code
-
-Let's break down some of the key components of the DescriptoBot script.
-
-### Fetching the Git Diff
-Here we simply use the `git diff` command to get the difference between the source and target branches, both in summary and full form.
-This provides the context for the OpenAI model to generate a meaningful PR description. 
 ```python
 def get_diff(source_branch, target_branch):
   """
@@ -59,23 +50,23 @@ def get_diff(source_branch, target_branch):
     raise
   else:
     return diff_summary, diff
+
+
+# Calling the function
+diff_summary, diff = get_diff(
+    source_branch=os.getenv("DESCRIPTOBOT_SOURCE_BRANCH"),
+    target_branch=os.getenv("DESCRIPTOBOT_TARGET_BRANCH")
+)
 ```
 
-## Tokenizing the Diff
-Using the tiktoken library, we encode the diff into tokens, which helps us calculate the cost of using the OpenAI model based on the number of tokens.
+### Passing the diff along with a system message to OpenAI.
+Here we use the Python SDK for OpenAI, the `AzureOpenAI` which is nearly identical to the `OpenAI` SDK.
+
+Next we craft a system message that explains the task to the bot, and then pass the system message, diff summary, and full diff to the OpenAI model.
 
 ```python
-import tiktoken
+from openai import AzureOpenAI
 
-enc = tiktoken.encoding_for_model(model['name'])
-tokens = enc.encode(diff)
-diff_cost = len(tokens) * model["input_cost"]
-print(f"Git diff tokens: {len(tokens)}, Cost: ${diff_cost:.2f}")
-```
-
-## OpenAI 
-
-```python
 client = AzureOpenAI(
   azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
   api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -100,3 +91,57 @@ response = client.chat.completions.create(
 )
 ```
 
+### Tracking the cost of the OpenAI model usage, for proof of value.
+The other thing i wanted to do was expose the cost of using the OpenAI model to the user. This is important for tracking the cost of the bot and ensuring that it is providing value.
+
+The OpenAI billing uses two main measures for cost, input tokens and output tokens. The input tokens are the tokens used to generate the response, while the output tokens are the tokens in the response. The cost is calculated based on the number of tokens used.
+
+The SDK response will provide both the input and output tokens, which we can use to calculate the cost.
+
+```python
+model_info = {
+    "gpt-4o": {
+        "name": "gpt-4o",
+        "input_tokens": 128000,
+        "output_tokens": 4096,
+        "input_cost": 0.0000082,
+        "output_cost": 0.0000245,
+    },
+}
+
+prompt_cost = response.usage.prompt_tokens * model["input_cost"]
+completion_cost = response.usage.completion_tokens * model["output_cost"]
+total_cost = prompt_cost + completion_cost
+```
+
+### Automatically updating the PR description in Azure DevOps
+
+Here we just use the Azure DevOps REST API to update the PR description with the generated content.
+I won't go into the details of the API call, but you can find the documentation [here](https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/update?view=azure-devops-rest-7.1).
+
+I've asked the model to suggest a PR title based on the changes, so we extract the first line of the PR description and use it as the PR title. We then add a footer to the PR description that includes the cost of using the OpenAI model.
+
+
+```python
+footer = f"""
+
+---
+_Pull Request description generated by **{model['name']}** check for accuracy_
+
+_Prompt Cost: ${prompt_cost:.2f} (input tokens: {response.usage.prompt_tokens})
+Completion Cost: ${completion_cost:.2f} (output tokens: {response.usage.completion_tokens})
+Total Cost: ${total_cost:.2f}_
+"""
+
+# build the final PR description
+# extract the first line of the PR description
+pr_title = response.choices[0].message.content.split("\n")[0]
+print(pr_title)
+
+# Remove the first line from the PR description & add the footer
+pr_description = "\n".join(response.choices[0].message.content.split("\n")[1:]) + footer
+print(pr_description)
+
+# Call the function to update the PR description
+update_pr_description(pr_number, pr_description, pr_title)
+```
