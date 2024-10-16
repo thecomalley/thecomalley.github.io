@@ -44,17 +44,34 @@ badges:
   url: "https://www.credly.com/badges/40a2833b-38e6-48de-930a-f01951637cb7/public_url"
   badge: "https://images.credly.com/size/340x340/images/5c50a643-ef0f-4bea-9c90-6fe2e785a1c8/image.png"
 
-- type: soft-skill-indicator
-  name: Leadership
-  percentage: 85
-  color: blue
+- type: certification
+  name: Deploy cloud-native apps using Azure Container Apps
+  url: "https://learn.microsoft.com/api/credentials/share/en-au/comalley/401380B0AC346BCA?sharingId=AC480DD143EEB4E4"
+  badge: "https://learn.microsoft.com/en-us/media/profile/zero-state-applied-skills.svg?branch=main"
 
-- type: soft-skill-indicator
-  name: Team Work
-  percentage: 90
-  color: yellow
+- type: certification
+  name: Develop AI agents using Microsoft Azure OpenAI and Semantic Kernel
+  url: "https://learn.microsoft.com/api/credentials/share/en-au/comalley/A8947EFC60ED4AC?sharingId=AC480DD143EEB4E4"
+  badge: "https://learn.microsoft.com/en-us/media/profile/zero-state-applied-skills.svg?branch=main"
 
-- type: soft-skill-indicator
-  name: Hard Working
-  percentage: 85
-  color: orange
+- type: certification
+  name: Implement security through a pipeline using Azure DevOps
+  url: "https://learn.microsoft.com/api/credentials/share/en-au/comalley/7204F57C466F8C95?sharingId=AC480DD143EEB4E4"
+  badge: "https://learn.microsoft.com/en-us/media/profile/zero-state-applied-skills.svg?branch=main"
+
+
+# - type: soft-skill-indicator
+#   name: Leadership
+#   percentage: 85
+#   color: blue
+
+# - type: soft-skill-indicator
+#   name: Team Work
+#   percentage: 90
+#   color: yellow
+
+# - type: soft-skill-indicator
+#   name: Hard Working
+#   percentage: 85
+#   color: orange
+
