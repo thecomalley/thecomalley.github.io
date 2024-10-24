@@ -76,6 +76,8 @@ params:
     blog:
       enable: true
       showAuthor: true # shows the post author (defaults true)
+    copyCodeButton:
+      enable: true
     toc:
       enable: true
 
