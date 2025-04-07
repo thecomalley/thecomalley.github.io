@@ -213,11 +213,19 @@ HashiCorp recently introduced write-only arguments and ephemeral resources to en
 
 Previously, creating a secret in the Key Vault would also store its value in the Terraform state file, exposing it in plaintext and duplicating it in two locations. This was not ideal for sensitive data.
 
+Even adding a lifecycle ignore_changes block wouldn't get around this issue, while it would allow the user to update the value in the portal independent of terraform running a `terraform plan` would still refresh the actual secret value into the state file 
+
+```hcl
+lifecycle {
+  ignore_changes = [value] # Allow the value to be managed in the portal
+}
+```
+
 With AzureRM v4.23.0, the `value_wo` argument in the `azurerm_key_vault_secret` resource allows secrets to be created in the Key Vault without saving their values in the state file. This is particularly useful for secrets managed outside of Terraform, such as passwords or API keys.
 
-This module pre-creates the required secrets and links them to the function app using [Key Vault references](https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli). However, it leaves the responsibility of setting the secret values to the user. By adding a lifecycle ignore block to the `azurerm_key_vault_secret` resource, we ensure that secrets are not recreated when their values are updated in the Key Vault. This approach also prevents unnecessary state changes.
+This module pre-creates the required secrets and links them to the function app using [Key Vault references](https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli). However, it leaves the responsibility of setting the secret values to the user. 
 
-In summary, this approach ensures secure and efficient management of secrets while avoiding exposure in the Terraform state file.
+This approach leaves us with a Function app that is ready to go all the user needs to do is update the value of any secrets in the KeyVault
 
 ## Conclusion
 
