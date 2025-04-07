@@ -74,7 +74,7 @@ Each Terraform test lives in a test file. Terraform discovers test files are bas
 :::
 
 ### Provider
-We define our provider the same way we would in our main module. Since azurerm v4, the `subscription_id` is a required field, but we can set it via the `ARM_SUBSCRIPTION_ID` environment variable, i've added a comment to remind me to do so!
+We define our provider the same way we would in our main module. Since azurerm v4, the `subscription_id` is a required field, but we can set it via the `ARM_SUBSCRIPTION_ID` environment variable, I've added a comment to remind me to do so!
 
 ```ruby
 # tests/main.tftest.hcl
@@ -86,8 +86,7 @@ provider "azurerm" {
 
 ### Setup Module
 
-Often times the module will depend on pre-existing infrastructure, a common pattern is to deploy this infrastructure in a setup module
-before running the test. While this module doesn't require any prerequisites, I still have a setup module to create a random ID for the test run. This is useful for creating unique resource names and avoiding name collisions.
+Often, modules depend on pre-existing infrastructure. A common pattern is to deploy this infrastructure in a setup module before running the test. While this module doesn't require any prerequisites, I still include a setup module to create a random ID for the test run. This helps in generating unique resource names and avoiding name collisions.
 
 ```ruby
 # tests/main.tftest.hcl
@@ -210,13 +209,15 @@ run "source_code_deployed" {
 
 ## Secrets Management
 
-Recently, HashiCorp introduced write-only arguments along with ephemeral resources to better manage secrets. This module leverages this functionality.
+HashiCorp recently introduced write-only arguments and ephemeral resources to enhance secret management. This module leverages these features.
 
-Previously, if we created a secret in the Key Vault, it would also be referenced in the state file. This exposed the secret value in plaintext and duplicated it in two places.
+Previously, creating a secret in the Key Vault would also store its value in the Terraform state file, exposing it in plaintext and duplicating it in two locations. This was not ideal for sensitive data.
 
-With azurerm v4.23.0, the `value_wo` argument in the `azurerm_key_vault_secret` resource allows us to create a secret in the Key Vault without saving the value in the state file. This is ideal for secrets managed outside of Terraform, such as passwords or API keys.
+With AzureRM v4.23.0, the `value_wo` argument in the `azurerm_key_vault_secret` resource allows secrets to be created in the Key Vault without saving their values in the state file. This is particularly useful for secrets managed outside of Terraform, such as passwords or API keys.
 
-This module pre-creates any required secrets and connects them to the function app via [Key Vault references](https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli). However, it leaves the responsibility of setting the secret value to the user.
+This module pre-creates the required secrets and links them to the function app using [Key Vault references](https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli). However, it leaves the responsibility of setting the secret values to the user. By adding a lifecycle ignore block to the `azurerm_key_vault_secret` resource, we ensure that secrets are not recreated when their values are updated in the Key Vault. This approach also prevents unnecessary state changes.
+
+In summary, this approach ensures secure and efficient management of secrets while avoiding exposure in the Terraform state file.
 
 ## Conclusion
 
