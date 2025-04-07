@@ -82,13 +82,15 @@ const config = {
       },
       footer: {
         style: 'dark',
-        links: [],
+        links: [
+
+        ],
         copyright: `Copyright © ${new Date().getFullYear()} Chris O'Malley`,
       },
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
-        additionalLanguages: ['bash', "bicep", "hcl", "powershell"],
+        additionalLanguages: ['bash', "bicep", "hcl", "powershell", "ruby"],
       },
     }),
 };
