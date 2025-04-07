@@ -92,6 +92,11 @@ const config = {
         darkTheme: prismThemes.dracula,
         additionalLanguages: ['bash', "bicep", "hcl", "powershell", "ruby"],
       },
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
     }),
 };
 
