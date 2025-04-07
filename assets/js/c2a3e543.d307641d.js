@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkmy_blog=self.webpackChunkmy_blog||[]).push([[885],{2937:a=>{a.exports=JSON.parse('{"tags":[{"label":"ai","permalink":"/tags/ai","count":1},{"label":"azure-devops","permalink":"/tags/azure-devops","count":1},{"label":"openai","permalink":"/tags/openai","count":1},{"label":"git","permalink":"/tags/git","count":1}]}')}}]);
