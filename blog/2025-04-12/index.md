@@ -11,6 +11,8 @@ As cloud engineers and developers working with Azure, we've all been there - for
 
 There are many tools and scripts available for to accomplish this, But in this blog post i'll share the solution im using to keep my Azure costs under control.
 
+![](./hero.png)
+
 <!-- truncate -->
 
 ## Why Even have Sandbox Subscriptions?
