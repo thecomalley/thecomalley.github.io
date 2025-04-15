@@ -63,6 +63,10 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        gtag: {
+          trackingID: 'G-Y4TL2X7JP4',
+          anonymizeIP: true, // Should IPs be anonymized?
+        },
       },
     ],
   ],
