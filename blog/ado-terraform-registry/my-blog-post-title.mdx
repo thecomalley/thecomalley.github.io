@@ -1,0 +1,77 @@
+---
+title: Welcome Docusaurus
+description: This is my first post on Docusaurus.
+slug: welcome-docusaurus-v2
+authors:
+  - name: Joel Marcey
+    title: Co-creator of Docusaurus 1
+    url: https://github.com/JoelMarcey
+    image_url: https://github.com/JoelMarcey.png
+    socials:
+      x: joelmarcey
+      github: JoelMarcey
+tags: [hello, docusaurus-v2]
+image: https://i.imgur.com/mErPwqL.png
+hide_table_of_contents: false
+tags:
+  - Releases
+  - docusaurus
+image: a thumbnail image to be shown in social media cards
+keywords: [keywords, describing, the main topics]
+---
+
+Welcome to this blog. This blog is created with [**Docusaurus 2**](https://docusaurus.io/).
+
+<!-- truncate -->
+
+So you want to build a Terraform Module library in Azure DevOps
+
+# So here are our goals
+
+1. Each module requires a PR and peer review to be merged
+2. Each module is validated against the SAME set of standards
+3. Each module is versioned
+
+Constraints
+- KISS - Keep it simple stupid
+- DRY - Don't Repeat Yourself
+
+Ok so the first one is easy, here's some terraform code to create our project and enforce the branch control.
+
+
+The second goal we have a few options, we could include a pipeline inside each repo
+
+
+```yaml
+# description: Clones the pull request repository and checks out the pull request branch, PR is cloned into $(PullRequestDirectory) 
+# requires: persistCredentials: true
+---
+steps:
+- task: Bash@3
+  displayName: 'Checkout Pull Request Repo'
+  inputs:
+    targetType: 'inline'
+    script: |
+      git config --global http.extraheader "AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"
+
+      PullRequestRepositoryUri=$(System.PullRequest.SourceRepositoryUri)
+      PullRequestRepositoryName=$(basename $PullRequestRepositoryUri)
+      echo "##[debug] PullRequestRepositoryName = $PullRequestRepositoryName"
+      echo "##vso[task.setvariable variable=PullRequestRepositoryName]$PullRequestRepositoryName"
+
+      cloneDir=$(Pipeline.Workspace)/s/$PullRequestRepositoryName
+      echo "##[debug] PullRequestDirectory = $cloneDir"
+      echo "##vso[task.setvariable variable=PullRequestDirectory]$cloneDir"
+      git clone $PullRequestRepositoryUri $cloneDir --progress
+      cd $cloneDir
+
+      PullRequestRemoteBranch="refs/remotes/pull/$(System.PullRequest.PullRequestId)/merge"
+      PullRequestLocalBranch="refs/pull/$(System.PullRequest.PullRequestId)/merge"
+      echo "##[debug] PullRequestRemoteBranch = $PullRequestRemoteBranch"
+      echo "##[debug] PullRequestLocalBranch = $PullRequestLocalBranch"
+
+      git fetch origin +$PullRequestLocalBranch:$PullRequestRemoteBranch
+      git checkout pull/$(System.PullRequest.PullRequestId)/merge
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+```
