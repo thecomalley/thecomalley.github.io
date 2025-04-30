@@ -41,6 +41,10 @@ Ok so the first one is easy, here's some terraform code to create our project an
 
 The second goal we have a few options, we could include a pipeline inside each repo
 
+Approach
+- pre-commit, ideally done by the Dev but we check just incase
+- Terraform Test
+- Vulnerability scan
 
 ```yaml
 # description: Clones the pull request repository and checks out the pull request branch, PR is cloned into $(PullRequestDirectory) 
