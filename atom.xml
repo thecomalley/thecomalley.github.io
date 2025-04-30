@@ -2,11 +2,107 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://thecomalley.github.io</id>
     <title>Chris O'Malley Blog</title>
-    <updated>2025-04-12T00:00:00.000Z</updated>
+    <updated>2025-04-28T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://thecomalley.github.io"/>
     <subtitle>Chris O'Malley Blog</subtitle>
     <icon>https://thecomalley.github.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[My Homelab Evolution - Plans for 2025]]></title>
+        <id>https://thecomalley.github.io/homelab-2025</id>
+        <link href="https://thecomalley.github.io/homelab-2025"/>
+        <updated>2025-04-28T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[In this post, I’m sharing my plans for my homelab in 2025. I’ve been running a homelab in some form for years now. It’s been a great way to learn, experiment, and stay hands-on with new technologies. As we head into 2025, I’m taking a fresh look at my setup with some clear goals in mind. Here's what I’m aiming to build, explore, and improve in the coming year.]]></summary>
+        <content type="html"><![CDATA[<p>In this post, I’m sharing my plans for my homelab in 2025. I’ve been running a homelab in some form for years now. It’s been a great way to learn, experiment, and stay hands-on with new technologies. As we head into 2025, I’m taking a fresh look at my setup with some clear goals in mind. Here's what I’m aiming to build, explore, and improve in the coming year.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-is-a-homelab">What is a homelab?<a href="https://thecomalley.github.io/homelab-2025#what-is-a-homelab" class="hash-link" aria-label="Direct link to What is a homelab?" title="Direct link to What is a homelab?">​</a></h2>
+<p>A homelab is a personal computing environment that you can use to learn, experiment, and develop new skills. It can be as simple as a single computer or as complex as a network of servers and devices. A homelab can be used for a variety of purposes and there are whole communities dedicated to the hobby. Take a look at the <a href="https://www.reddit.com/r/homelab/" target="_blank" rel="noopener noreferrer">homelab subreddit</a> for example.</p>
+<p><img decoding="async" loading="lazy" src="https://thecomalley.github.io/assets/images/697s14n5uup21-de6582052c045f9593d27a85ab65dbec.png" width="1920" height="220" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-do-i-have-a-homelab">Why do I have a homelab?<a href="https://thecomalley.github.io/homelab-2025#why-do-i-have-a-homelab" class="hash-link" aria-label="Direct link to Why do I have a homelab?" title="Direct link to Why do I have a homelab?">​</a></h2>
+<p>For me, learning by doing is most effective, making my homelab an ideal environment to experiment with new technologies and acquire new skills. I also use my homelab to run a few services that I use in my day to day life.</p>
+<p>By deploying and running actual workloads it allows me to gain an understanding and experience not as easily achieved by reading documentation or watching videos.</p>
+<p>My DevOps career largely started thanks to tinkering with Home Assistant and unRAID, this introduced me to yml and Docker and it just snowballed from there.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="my-homelab">My homelab<a href="https://thecomalley.github.io/homelab-2025#my-homelab" class="hash-link" aria-label="Direct link to My homelab" title="Direct link to My homelab">​</a></h2>
+<p>I've recently refactored my homelab repo and cleared up some hardware for some new projects, things are sparse for now, but it marks the beginning of a new era</p>
+<p><img decoding="async" loading="lazy" src="https://thecomalley.github.io/assets/images/architecture-4c2b8a9235dbc164aae87cbd48040a97.png" width="1141" height="831" class="img_ev3q"></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="environments">Environments<a href="https://thecomalley.github.io/homelab-2025#environments" class="hash-link" aria-label="Direct link to Environments" title="Direct link to Environments">​</a></h3>
+<p>As is often the case with homelab environments I have a family that consumes some of the services provided by the homelab. In order to minimise the number of times I have to explain why Plex or DNS is not working, I have split my homelab into two environments.</p>
+<ul>
+<li><strong>Home Production</strong> This is any service anyone other than me uses. This includes things like the Plex, DNS etc.
+The guiding principle here is KISS (Keep It Simple Stupid)</li>
+<li><strong>Home Lab</strong> This is stuff only I care about.
+The guiding principle here is deploy things that encourage me to learn and experiment with new technologies while also providing a semi useful service.</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="clouds">Clouds<a href="https://thecomalley.github.io/homelab-2025#clouds" class="hash-link" aria-label="Direct link to Clouds" title="Direct link to Clouds">​</a></h3>
+<p>My homelab is deployed across two clouds OnPrem (obviously it's a <strong>Home</strong>lab after all!) and Azure (given its my day job to work with Azure)</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="platforms">Platforms<a href="https://thecomalley.github.io/homelab-2025#platforms" class="hash-link" aria-label="Direct link to Platforms" title="Direct link to Platforms">​</a></h3>
+<p>I define a platform as anything that can host one or more workloads and lives on a specific cloud. <code>cloud → platform → workload</code></p>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_BuS1"><p>Cloud Native workloads obviously skip this layer and run directly on cloud Services</p></div></div>
+<p>I have a few platforms OnPrem</p>
+<ul>
+<li><strong>unRAID</strong> This is my main NAS and hosts a number of "Home Prod" workloads</li>
+<li><strong>Home Assistant OS</strong> This hosts Home Assistant and a number of other Home Automation containers</li>
+<li><strong>rpi3b Docker</strong> This is a small standalone Docker host that runs a few containers</li>
+<li><strong>ProxMox</strong> I've just freed up this server and am planning to install a ProxMox cluster on it. This will be used to run a few workloads</li>
+<li><strong>K3s</strong> I've dedicated some Raspberry Pi's and started building a k3s cluster, stay tuned for more on this in the future</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="workloads">Workloads<a href="https://thecomalley.github.io/homelab-2025#workloads" class="hash-link" aria-label="Direct link to Workloads" title="Direct link to Workloads">​</a></h3>
+<p>There are too many workloads to list here, but for more information on the Platforms and workloads I run check out the <a href="https://github.com/thecomalley/homelab/tree/main" target="_blank" rel="noopener noreferrer">homelab repository</a></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="design-guidelines">Design Guidelines<a href="https://thecomalley.github.io/homelab-2025#design-guidelines" class="hash-link" aria-label="Direct link to Design Guidelines" title="Direct link to Design Guidelines">​</a></h2>
+<p>I try to follow a few design guidelines when building out my homelab. These are not hard and fast rules but more of a guiding principle / things to aim for.</p>
+<ul>
+<li><strong>Everything As Code</strong>
+<ul>
+<li><em>The big exception here is the Home Prod environment, in the name of KISS, there is a fair amount of ClickOps</em></li>
+</ul>
+</li>
+<li><strong>Open Source</strong>
+<ul>
+<li>I've learnt heaps from the wider open source community &amp; content creators, so I'd like to do my small part to contribute back to the community</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="2025-plans">2025 Plans<a href="https://thecomalley.github.io/homelab-2025#2025-plans" class="hash-link" aria-label="Direct link to 2025 Plans" title="Direct link to 2025 Plans">​</a></h2>
+<p>So what are we looking to achieve in 2025?</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <strong>Clear separation of Home and Lab environments</strong>
+<ul>
+<li>This is mostly done now — we’ve got a clear path for a k3s and Proxmox cluster that has no <strong>Home Production</strong> workloads on it</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Deploy new <em>lab</em> workloads into a Kubernetes cluster</strong>
+<ul>
+<li>I've started tinkering with k3s and have a fair idea of how I want to build this out. There will likely be a few blog posts on this in the future</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Enable GitOps via ArgoCD for Kubernetes</strong>
+<ul>
+<li>I want to be able to deploy workloads into my lab via GitOps, this will allow me to easily deploy and destroy workloads as required</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Deploy a Hybrid Windows Server Lab</strong>
+<ul>
+<li>I sometimes need to dive back into Windows Server and AD for work, so having a lab that I can boot up as required is useful</li>
+<li>I'll split this Windows Server environment across Azure and OnPrem to replicate a real world scenario</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Deploy a Self-hosted Pipeline agent to allow GitOps OnPrem</strong>
+<ul>
+<li>I've already got a few Terraform and Ansible projects that are run locally from my laptop within the homelab repo, so getting a pipeline agent up and running would let me transition these into a more automated GitOps workflow</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Deploy High Availability ProxMox &amp; K3s cluster</strong>
+<ul>
+<li>This one is dependent on some new hardware, but ideally i'd like to get a 3 node ProxMox cluster up and running with a 3 node k3s cluster on top of it. This will allow me to run workloads in a more production like environment</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="wrapping-up">Wrapping Up<a href="https://thecomalley.github.io/homelab-2025#wrapping-up" class="hash-link" aria-label="Direct link to Wrapping Up" title="Direct link to Wrapping Up">​</a></h2>
+<p>This homelab roadmap will probably evolve over time—as all good plans do—but it gives me a solid foundation for 2025. I’ll continue updating my <a href="https://github.com/thecomalley/homelab" target="_blank" rel="noopener noreferrer">homelab repository</a> as I go, and might post updates here as well. If you’re working on your own homelab or have questions, feel free to reach out or share what you’re building too.</p>]]></content>
+        <author>
+            <name>Chris O'Malley</name>
+        </author>
+        <category label="git" term="git"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Azure Sandbox Nuke]]></title>
         <id>https://thecomalley.github.io/azure-sandbox-nuke</id>
