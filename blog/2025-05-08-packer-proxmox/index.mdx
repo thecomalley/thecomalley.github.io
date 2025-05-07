@@ -1,0 +1,253 @@
+---
+slug: packer-proxmox-ubuntu-
+title: Building Ubuntu Server 24.04 Templates for ProxMox with Packer
+authors: [chris]
+tags: [packer, proxmox, ubuntu]
+---
+
+# Building Ubuntu Server 24.04 Templates for ProxMox with Packer
+
+![ProxMox and Packer logos side by side](placeholder-for-proxmox-packer-logos.jpg)
+*[Screenshot suggestion: Add an image with ProxMox and Packer logos side by side]*
+
+## Introduction
+
+In my homelab journey, one of the most time-consuming tasks is creating consistent, reproducible virtual machine templates. Manually creating VM templates is tedious and error-prone. That's where Packer comes in - an open-source tool from HashiCorp that automates the creation of machine images.
+
+In this post, I'll share how I use Packer to create Ubuntu Server 24.04 (Noble Numbat) templates for my ProxMox virtualization environment.
+
+## Why Use Packer with ProxMox?
+
+Before diving into the technical details, let's quickly cover why this combination works so well:
+
+- **Automation**: Create templates without manual intervention
+- **Consistency**: Every template is identical, eliminating configuration drift
+- **Version Control**: Store your template definitions in git
+- **CI/CD Integration**: Automate template creation as part of your pipeline
+- **Idempotency**: Run the same process repeatedly with identical results
+
+![ProxMox UI showing templates](placeholder-for-proxmox-templates-screenshot.jpg)
+*[Screenshot suggestion: Show the ProxMox UI with your templates listed]*
+
+## The Template Structure
+
+My Packer template for Ubuntu Server 24.04 is organized as follows:
+
+```
+ubuntu-server-24-04/
+├── README.md
+├── ubuntu-server-24-04.pkr.hcl
+├── variables.pkr.hcl
+├── my.auto.pkrvars.hcl (excluded from git)
+└── files/
+    ├── 99-pve.cfg
+    ├── meta-data
+    └── user-data.pkrtpl.hcl
+```
+
+Let's break down each component:
+
+### Main Configuration (ubuntu-server-24-04.pkr.hcl)
+
+The main configuration file defines the Packer template for building a Ubuntu Server 24.04 VM template on ProxMox. It starts with the required plugins declaration:
+
+```hcl
+packer {
+  required_plugins {
+    proxmox = {
+      version = "~> 1.0"
+      source  = "github.com/hashicorp/proxmox"
+    }
+  }
+}
+```
+
+Then it sets up templated user-data using a local variable:
+
+```hcl
+locals {
+  user_data = templatefile("${path.root}/files/user-data.pkrtpl.hcl", {
+    ssh_username        = var.ssh_username
+    ssh_authorized_keys = join("\n", var.ssh_authorized_keys)
+  })
+}
+```
+
+The VM template settings are configured with detailed specifications for disk, CPU, memory, networking, and more.
+
+![Packer running build process](placeholder-for-packer-build-terminal.jpg)
+*[Screenshot suggestion: Terminal window showing Packer run in progress]*
+
+### Variables (variables.pkr.hcl)
+
+The variables file defines what parameters can be customized:
+
+- `proxmox_node`: The Proxmox node to build on
+- `vm_id`: VM ID for the template
+- `vm_name`: VM name for the template
+- `ssh_username`: Username for SSH connections
+- `ssh_authorized_keys`: SSH public keys for the user
+
+### Cloud-Init Configuration (user-data.pkrtpl.hcl)
+
+The cloud-init configuration uses HCL templating to inject variables at build time:
+
+```hcl
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_NZ
+  keyboard:
+    layout: us
+  ssh:
+    install-server: true
+    allow-pw: true
+    disable_root: true
+    ssh_quiet_keygen: true
+    allow_public_ssh_keys: true
+  # More configuration...
+  user-data:
+    package_upgrade: false
+    timezone: Pacific/Auckland
+    users:
+      - name: ${ssh_username}
+        groups: [adm, sudo]
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ${ssh_authorized_keys}
+```
+
+## Security and Authentication
+
+For security, I separate authentication from configuration. This means:
+
+1. Authentication credentials are stored in environment variables:
+   ```sh
+   PROXMOX_URL="https://<server>:<port>/api2/json"
+   PROXMOX_USERNAME="root"
+   PROXMOX_TOKEN="<token>"
+   ```
+
+2. Configuration variables are in a `.auto.pkrvars.hcl` file (excluded from git):
+   ```hcl
+   proxmox_node = "pve"
+   ssh_username = "omadmin"
+   ssh_authorized_keys = ["ssh-rsa AAAAB3Nz..."]
+   ```
+
+![ProxMox API tokens page](placeholder-for-proxmox-tokens-page.jpg)
+*[Screenshot suggestion: ProxMox API tokens configuration page (with sensitive data blurred)]*
+
+## The Installation Process
+
+The Packer process follows these steps:
+
+1. **Start VM**: Boots a VM with the Ubuntu Server 24.04 ISO
+2. **Autoinstall**: Uses the boot command to trigger Ubuntu's autoinstall
+3. **Cloud-Init**: Configures the system using cloud-init
+4. **Provisioning**: Runs shell provisioners to clean up and prepare the VM
+5. **Template Creation**: Converts the VM to a template
+
+The boot command is particularly interesting:
+
+```hcl
+boot_command = [
+  "<esc><wait>",
+  "e<wait>",
+  "<down><down><down><end>",
+  "<bs><bs><bs><bs><wait>",
+  "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
+  "<f10><wait>"
+]
+```
+
+This sequence escapes the GRUB menu, modifies the boot parameters to use the autoinstall feature, and points it to the HTTP server that Packer spins up containing our cloud-init configuration.
+
+## Preparing the Template
+
+After the installation, several cleanup steps prepare the VM for templating:
+
+```hcl
+provisioner "shell" {
+  inline = [
+    "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+    "sudo rm /etc/ssh/ssh_host_*",
+    "sudo truncate -s 0 /etc/machine-id",
+    "sudo apt -y autoremove --purge",
+    "sudo apt -y clean",
+    "sudo apt -y autoclean",
+    "sudo cloud-init clean",
+    "sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
+    "sudo rm -f /etc/netplan/00-installer-config.yaml",
+    "sudo sync"
+  ]
+}
+```
+
+Additionally, I include a custom cloud-init configuration file to ensure ProxMox's cloud-init integration works correctly:
+
+```hcl
+provisioner "file" {
+  source      = "files/99-pve.cfg"
+  destination = "/tmp/99-pve.cfg"
+}
+
+provisioner "shell" {
+  inline = ["sudo cp /tmp/99-pve.cfg /etc/cloud/cloud.cfg.d/99-pve.cfg"]
+}
+```
+
+The `99-pve.cfg` file contains:
+```
+datasource_list: [ConfigDrive, NoCloud]
+```
+
+This ensures that cloud-init looks for configuration from the right sources when deployed as a VM in ProxMox.
+
+![Completed VM template in ProxMox](placeholder-for-completed-template.jpg)
+*[Screenshot suggestion: ProxMox showing the completed VM template properties]*
+
+## Running the Build
+
+To build the template:
+
+1. Set the environment variables for authentication
+2. Create your variables file with the necessary configuration
+3. Run Packer:
+   ```bash
+   packer init .
+   packer build .
+   ```
+
+![Successful Packer build output](placeholder-for-successful-build.jpg)
+*[Screenshot suggestion: Terminal showing the successful completion of a Packer build]*
+
+## Improvements from Standard Approaches
+
+My implementation has a few improvements over standard approaches:
+
+1. Using `http_content` instead of `http_directory`:
+   ```hcl
+   http_content = {
+     "/user-data" = local.user_data
+     "/meta-data" = file("${path.root}/files/meta-data")
+   }
+   ```
+   This allows generating content dynamically during the Packer run using variables rather than static files.
+
+2. Separation of authentication and configuration variables for better security
+
+3. Thorough template preparation with proper cleanup steps for generalization
+
+## Conclusion
+
+Using Packer with ProxMox creates a powerful, automated workflow for generating VM templates. This approach saves time, reduces errors, and ensures consistency across deployments.
+
+The complete code is available in my homelab repository, and I've credited Christian Lempa whose excellent tutorial helped me get started with this setup.
+
+What automation tools are you using in your homelab? Let me know in the comments!
+
+---
+
+*Special thanks to Christian Lempa for his tutorial on Packer and ProxMox: https://www.youtube.com/watch?v=1nf3WOEFq1Y*
