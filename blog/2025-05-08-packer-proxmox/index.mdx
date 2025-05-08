@@ -11,11 +11,9 @@ tags: [packer, proxmox, ubuntu, iac]
 
 ## 🚀 Introduction
 
-In my homelab journey, I've embraced the "infrastructure as code" (IaC) philosophy. Having everything defined as code brings consistency, repeatability, and version control to my entire infrastructure.
+I'm planning on setting up a k3s cluster and Windows Server lab in my homelab, which means I need to provision quite a few VMs. Clicking through installers definitely isn't very "as code" 😅, so I've turned to Packer to build VM templates with the idea that i can deploy these templates using Terraform and have them configured via Ansible.
 
-I'm setting up a k3s cluster and Windows Server lab, which means I need to provision quite a few VMs. Clicking through installers definitely isn't very "as code" 😅, so I've turned to Packer to build VM templates with all the config needed for Ansible to provision them automatically.
-
-Sure, for Ubuntu I could just download the official [Ubuntu Cloud Images](https://cloud-images.ubuntu.com/), but since I'll need custom images for Windows anyway, I figured I'd build my own Ubuntu templates too. It's always interesting to peek under the hood, plus building custom templates gives me complete control over what's included.
+Now Ubuntu offers [Ubuntu Cloud Images](https://cloud-images.ubuntu.com/) which can easily converted into [Cloud-Init Templates](https://pve.proxmox.com/wiki/Cloud-Init_Support) for use with Proxmox. But but since I'll need custom images for Windows anyway I figured I'd build my own Ubuntu templates too. Its a good opportunity to learn how to use Packer and Proxmox together, and I can customize the templates to my liking.
 
 <!-- truncate -->
 
@@ -25,52 +23,58 @@ Packer is part of the HashiCorp suite of tools designed for modern infrastructur
 
 ## 🎯 My Requirements for VM Templates
 
-For my automation workflow to function smoothly, I need VM templates with these specific capabilities:
+I have two simple requirements for my VM templates:
 
-1. **Proxmox Cloud-Init Integration** - Templates must work seamlessly with Proxmox's cloud-init implementation, allowing me to set usernames and SSH keys either via the GUI or Terraform
-      
-2. **QEMU Guest Agent** - Must be pre-installed to enable better VM management and status reporting within Proxmox
-   
-3. **System Configuration** - Proper timezone settings and other baseline configurations
+1. **Proxmox Cloud-Init Support** - Templates must work seamlessly with Proxmox's cloud-init implementation, allowing me to set usernames and SSH keys either via the GUI or Terraform, Ubuntu 18.04 and later supports cloud-init natively, so we don't need to do anything special here, other than ensuring the VM template contains a CD-ROM drive, which will be used to pass the Cloud-Init data to the VM in ProxMox
 
-:::tip Why This Matters
-This approach creates a seamless automation pipeline: Packer builds the template → Terraform deploys VMs from the template with cloud-init customization → Ansible immediately connects for configuration management. No manual steps required!
-:::
+2. **QEMU Guest Agent** - Pre-installed QEMU guest agent for better VM management and monitoring. This is important for things like live migration, shutdown, and snapshotting. The QEMU guest agent is a daemon that runs inside the VM and communicates with the Proxmox host, providing information about the VM's state and allowing for better integration with the hypervisor.
 
-## ☁️ Understanding Cloud-Init
+## Cloud Init
 
-Before diving into the code, it's important to understand the role of cloud-init in our automation stack.
+Cloud-init is the industry standard method for cross-platform cloud instance initialization. It is supported across all major public cloud providers, provisioning systems for private cloud infrastructure, and bare-metal installations.
 
-### What is Cloud-Init?
+During boot, cloud-init identifies the cloud it is running on and initializes the system accordingly. Cloud instances will automatically be provisioned during first boot with networking, storage, SSH keys, packages and various other system aspects already configured.
 
-Cloud-init is the industry standard for early VM initialization. It's a set of Python scripts and utilities that handle the initial setup of a virtual machine, allowing you to:
-
-- Configure hostnames
-- Generate SSH keys
-- Set up users and passwords
-- Install packages
-- Run custom scripts
-
-Originally developed for cloud environments like AWS and Azure, cloud-init has become the standard way to customize virtual machines at first boot across many platforms, including Proxmox.
-
-### Why Cloud-Init Matters for Proxmox Templates
-
-Proxmox has built-in support for cloud-init, but there's a bit of magic required to make your templates work seamlessly:
-
-1. **Configuration Sources** - Proxmox uses specific cloud-init data sources that need to be configured in your template
-2. **Drive Integration** - When you clone a template, Proxmox automatically attaches a cloud-init drive with your customizations
-3. **First-Boot Automation** - Cloud-init runs on the first boot of each VM clone, applying your customizations
+Proxmox uses the `NoCloud` datasource to provide cloud-init with the necessary configuration data. The VM needs to have attached as ISO images via a virtual CDROM drive. 
 
 :::info
-When a template with proper cloud-init configuration is cloned in Proxmox, you can customize the new VM via the GUI or API by setting hostname, IP address, SSH keys, and more - all without having to log in to the VM itself!
+The [Cloud Init datasource documentation](https://cloudinit.readthedocs.io/en/latest/reference/datasources.html#datasources-supported) is an interesting read for learning how other cloud providers pass configuration to the Virtual Machines.
 :::
 
-[Proxmox cloud-init interface](placeholder-for-proxmox-cloudinit-ui.jpg)
-*[Screenshot suggestion: The Proxmox GUI showing the cloud-init configuration panel]*
+## 🔐 Security and Authentication
 
-With a proper understanding of cloud-init, we can now look at how to build our template with Packer.
+We need to authenticate with the Proxmox API to create and manage VMs. The recommended way to do this is by using an API token, which can be created in the Proxmox web interface.
 
-## 🗂️ The Template Structure
+:::danger Security Best Practice
+Never commit credentials or sensitive tokens to your git repository! Always use environment variables or secure vaults for authentication information.
+:::
+
+1. Authentication credentials are stored in environment variables:
+   ```sh
+   PROXMOX_URL="https://<server>:<port>/api2/json"
+   PROXMOX_USERNAME="root"
+   PROXMOX_TOKEN="<token>"
+   ```
+
+2. Configuration variables are in a `.auto.pkrvars.hcl` file (excluded from git):
+   ```hcl
+   proxmox_node = "pve"
+   ssh_username = "superadmin"
+   ssh_authorized_keys = ["ssh-rsa AAAAB3Nz..."]
+   ```
+
+## 🛠️ The Installation Process
+
+The Packer process follows these steps:
+
+1. **Start VM**: Boots a VM with the Ubuntu Server 24.04 ISO
+2. **Autoinstall**: Uses the boot command to trigger Ubuntu's autoinstall
+3. **Cloud-Init**: Configures the system using cloud-init
+4. **Provisioning**: Runs shell provisioners to clean up and prepare the VM
+5. **Template Creation**: Converts the VM to a template
+
+
+## 🗂️ Repository Structure
 
 My Packer template for Ubuntu Server 24.04 is organized as follows:
 
@@ -86,11 +90,20 @@ ubuntu-server-24-04/
     └── user-data.pkrtpl.hcl
 ```
 
-Let's break down each component:
+### 🔧 Variables (variables.pkr.hcl)
 
-### 📄 Main Configuration (ubuntu-server-24-04.pkr.hcl)
+The variables file defines what parameters can be customized:
 
-The main configuration file defines the Packer template for building a Ubuntu Server 24.04 VM template on Proxmox. It starts with the required plugins declaration:
+- `proxmox_node`: The Proxmox node to build on
+- `vm_id`: VM ID for the template
+- `vm_name`: VM name for the template
+- `ssh_username`: Username for SSH connections
+- `ssh_authorized_keys`: SSH public keys for the user
+
+
+### 📄 1. Boot a VM with the Ubuntu Server 24.04 ISO
+
+The main Packer configuration file (`ubuntu-server-24-04.pkr.hcl`) defines the VM template and its settings. It uses the `proxmox-iso` builder to create a VM from an ISO image.
 
 ```hcl
 packer {
@@ -101,9 +114,84 @@ packer {
     }
   }
 }
+
+# Resource Definition for the VM Template
+source "proxmox-iso" "ubuntu-server-noble" {
+
+  insecure_skip_tls_verify = true
+  node                     = var.proxmox_node
+
+  # VM General Settings
+  vm_id   = "800"
+  vm_name = "ubuntu-server-noble"
+
+  template_name        = "template-ubuntu-server-24-04"
+  template_description = "Created by Packer on ${timestamp()}"
+
+  # VM OS Settings
+  boot_iso {
+    type             = "scsi"
+    iso_path         = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
+    iso_storage_pool = "local"
+    unmount          = true
+  }
+
+  # VM System Settings
+  qemu_agent = true
+
+  # VM Hard Disk Settings
+  scsi_controller = "virtio-scsi-pci"
+
+  disks {
+    disk_size    = "20G"
+    format       = "raw"
+    storage_pool = "local-lvm"
+    type         = "virtio"
+  }
+
+  # VM CPU Settings
+  cores = "1"
+
+  # VM Memory Settings
+  memory = "2048"
+
+  # VM Network Settings
+  network_adapters {
+    model    = "virtio"
+    bridge   = "vmbr0"
+    firewall = "false"
+  }
+
+  # VM Cloud-Init Settings
+  cloud_init              = true
+  cloud_init_storage_pool = "local-lvm"
+
+...
+}
 ```
 
-Then it sets up templated user-data using a local variable:
+### 🖥️ Boot command to trigger Ubuntu's autoinstall
+
+This sequence escapes the GRUB menu, modifies the boot parameters to use the autoinstall feature, and points it to the HTTP server that Packer spins up containing our cloud-init configuration.
+
+```hcl
+  # The time to wait after booting the initial virtual machine before typing the boot_command
+  boot_wait = "10s"
+
+  # Escape the GUI installer and use the autoinstall method
+  boot_command = [
+    "<esc><wait>",
+    "e<wait>",
+    "<down><down><down><end>",
+    "<bs><bs><bs><bs><wait>",
+    "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
+    "<f10><wait>"
+  ]
+```
+
+### ☁️ Cloud-Init Configuration
+
+Packer also uses cloud-init to configure the VM during the build process. again using the `NoCloud` datasource. but instead of passing the configuration via an ISO image, it uses a local HTTP server to serve the configuration files. This allows Packer to pass the necessary configuration data to the VM during the build process. we configure this with the command `autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>`. in the `boot_command` section above.
 
 ```hcl
 locals {
@@ -112,6 +200,22 @@ locals {
     ssh_authorized_keys = join("\n", var.ssh_authorized_keys)
   })
 }
+
+  ...
+
+  # Provide content to the autoinstall Server
+  http_content = {
+    "/user-data" = local.user_data
+    "/meta-data" = file("${path.root}/files/meta-data")
+  }
+
+  communicator         = "ssh"
+  ssh_username         = var.ssh_username
+  ssh_private_key_file = "~/.ssh/id_rsa"
+
+  # Raise the timeout, when installation takes longer
+  ssh_timeout = "30m"
+  ssh_pty     = true
 ```
 
 :::note
@@ -119,19 +223,6 @@ The `templatefile` function allows us to use variables within our cloud-init con
 :::
 
 The VM template settings are configured with detailed specifications for disk, CPU, memory, networking, and more.
-
-[Packer running build process](placeholder-for-packer-build-terminal.jpg)
-*[Screenshot suggestion: Terminal window showing Packer run in progress]*
-
-### 🔧 Variables (variables.pkr.hcl)
-
-The variables file defines what parameters can be customized:
-
-- `proxmox_node`: The Proxmox node to build on
-- `vm_id`: VM ID for the template
-- `vm_name`: VM name for the template
-- `ssh_username`: Username for SSH connections
-- `ssh_authorized_keys`: SSH public keys for the user
 
 ### ☁️ Cloud-Init Configuration (user-data.pkrtpl.hcl)
 
@@ -169,60 +260,6 @@ autoinstall:
 This configuration takes care of three of our four key requirements: SSH keys, QEMU guest agent, and timezone. The 99-pve.cfg file (shown later) handles the Proxmox cloud-init integration.
 :::
 
-## 🔐 Security and Authentication
-
-For security, I separate authentication from configuration. This means:
-
-:::danger Security Best Practice
-Never commit credentials or sensitive tokens to your git repository! Always use environment variables or secure vaults for authentication information.
-:::
-
-1. Authentication credentials are stored in environment variables:
-   ```sh
-   PROXMOX_URL="https://<server>:<port>/api2/json"
-   PROXMOX_USERNAME="root"
-   PROXMOX_TOKEN="<token>"
-   ```
-
-2. Configuration variables are in a `.auto.pkrvars.hcl` file (excluded from git):
-   ```hcl
-   proxmox_node = "pve"
-   ssh_username = "omadmin"
-   ssh_authorized_keys = ["ssh-rsa AAAAB3Nz..."]
-   ```
-
-[Proxmox API tokens page](placeholder-for-proxmox-tokens-page.jpg)
-*[Screenshot suggestion: Proxmox API tokens configuration page (with sensitive data blurred)]*
-
-## 🛠️ The Installation Process
-
-The Packer process follows these steps:
-
-1. **Start VM**: Boots a VM with the Ubuntu Server 24.04 ISO
-2. **Autoinstall**: Uses the boot command to trigger Ubuntu's autoinstall
-3. **Cloud-Init**: Configures the system using cloud-init
-4. **Provisioning**: Runs shell provisioners to clean up and prepare the VM
-5. **Template Creation**: Converts the VM to a template
-
-:::caution
-The boot command sequence may vary slightly depending on your Proxmox version and the Ubuntu Server ISO you're using. You might need to adjust the key sequence if you encounter issues.
-:::
-
-The boot command is particularly interesting:
-
-```hcl
-boot_command = [
-  "<esc><wait>",
-  "e<wait>",
-  "<down><down><down><end>",
-  "<bs><bs><bs><bs><wait>",
-  "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
-  "<f10><wait>"
-]
-```
-
-This sequence escapes the GRUB menu, modifies the boot parameters to use the autoinstall feature, and points it to the HTTP server that Packer spins up containing our cloud-init configuration.
-
 ## 🧹 Preparing the Template
 
 After the installation, several cleanup steps prepare the VM for templating:
@@ -248,9 +285,9 @@ provisioner "shell" {
 These cleanup steps are crucial for ensuring that each VM created from this template will have unique identifiers and configurations. Without them, you might encounter networking or SSH issues when deploying multiple VMs.
 :::
 
-### ☁️ Enabling Proxmox Cloud-Init Integration
+### ☁️ Overriding Cloud-Init datasource
 
-The most critical part for meeting our first requirement is including a custom cloud-init configuration file to ensure Proxmox's cloud-init integration works correctly:
+Now the OS already has cloud-init installed, but since we are only ever going to run this template on Proxmox we can override the default datasource discovery 
 
 ```hcl
 provisioner "file" {
