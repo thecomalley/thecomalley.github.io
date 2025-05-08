@@ -4,3 +4,4 @@
   - Use emojis in the text when appropriate but don't overdo it
   - Make use of the Docusaurus Admonitions when appropriate
   - If you need direction stop and ask
+- Use New Zealand English (UK) spelling
