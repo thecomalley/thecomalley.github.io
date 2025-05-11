@@ -1,0 +1,7 @@
+- When assisting with writing a blog post do the following
+  - Use a casual tone, I'm trying to share technical knowledge not market myself like an American
+  - Use Emojis with headings
+  - Use emojis in the text when appropriate but don't overdo it
+  - Make use of the Docusaurus Admonitions when appropriate
+  - If you need direction stop and ask
+- Use New Zealand English (UK) spelling
